@@ -1,0 +1,123 @@
+"""Constantes de la planta. El estado se guarda en los objetos, no aquí."""
+from pathlib import Path
+
+# ---------------- General ----------------
+SHOW_MUJOCO_VIEWER = True
+SHOW_CAMERA_MOSAIC = True
+CAM_W = 360
+CAM_H = 260
+CAM_FPS = 10.0
+OUTPUT_DIR = Path(__file__).resolve().parent.parent / "capturas"
+
+# ---------------- Cintas ----------------
+BELT_SPEED = 0.55           # m/s
+VELOCIDAD_RODILLO = 5.5
+DISTANCIA_SEGURIDAD = 0.40  # distancia mínima entre piezas
+VEL_KP = 7.0
+CENTER_KP = 12.0
+MAX_FORCE = 12.0
+
+BELT_HALF_LENGTH = 1.45
+BELT_HALF_WIDTH = 0.28
+BELT_Z = 0.12
+BELT_TOP_Z = 0.18
+LANE = 1.45                 # línea central de cada cinta
+TURN_START = 1.08           # empieza el giro
+CORNER_SWITCH = 1.27        # cambio de cinta
+RAIL_END_GAP = 0.06
+RAIL_HALF_LENGTH = LANE - BELT_HALF_WIDTH - RAIL_END_GAP
+RAIL_THICKNESS = 0.035
+RAIL_HALF_HEIGHT = 0.10
+RAIL_CENTER_Z = 0.22
+
+# ---------------- Cámaras (posición en el modelo) ----------------
+CAM_HEIGHT = 0.92
+CAM_FOVY = 45.0
+CAM_LEFT_FOVY = 36.0
+CAM_LENS_SIDE_OFFSET = 0.10
+CAM_POLE_SIDE_OFFSET = BELT_HALF_WIDTH + 0.45
+CAM_OVEN_HEIGHT = 0.78
+CAM_OVEN_SIDE_OFFSET = 0.46
+CAM_OVEN_FOVY = 34.0
+CAM_LEFT_INSPECTION_Y = 0.82
+CAM_LEFT_HEAD_CLEARANCE = 0.20
+CAM_LEFT_POLE_CLEARANCE = 0.52
+
+# ---------------- Piezas ----------------
+LOCK_OBJECT_ROTATION = True
+LOCK_CYLINDERS_TO_CENTERLINE = True
+OBJECT_HALF = 0.085
+OBJ1_RADIUS = 0.075
+OBJ1_HALF_HEIGHT = 0.045
+OBJ2_HALF_Z = 0.070
+OBJ3_RADIUS = 0.085
+OBJ3_HALF_HEIGHT = 0.0375
+OBJ4_HALF_Z = 0.065
+OBJECT_CLEARANCE_Z = 0.01
+OBJECT_REST_Z = [
+    BELT_TOP_Z + OBJECT_HALF + OBJECT_CLEARANCE_Z,
+    BELT_TOP_Z + OBJ1_HALF_HEIGHT + OBJECT_CLEARANCE_Z,
+    BELT_TOP_Z + OBJ2_HALF_Z + OBJECT_CLEARANCE_Z,
+    BELT_TOP_Z + OBJ3_HALF_HEIGHT + OBJECT_CLEARANCE_Z,
+    BELT_TOP_Z + OBJ4_HALF_Z + OBJECT_CLEARANCE_Z,
+]
+
+# ---------------- Cinta 5 (hacia el horno) ----------------
+BRANCH_SPEED = 0.48
+BRANCH_Y = 0.0
+BRANCH_HALF_LENGTH = 1.15
+BRANCH_HALF_WIDTH = 0.32
+BRANCH_CENTER_X = -(LANE + BRANCH_HALF_LENGTH - 0.05)
+BRANCH_OPEN_HALF = 0.38
+BRANCH_RAIL_HALF = (RAIL_HALF_LENGTH - BRANCH_OPEN_HALF) / 2.0
+BRANCH_RAIL_CENTER_Y = (RAIL_HALF_LENGTH + BRANCH_OPEN_HALF) / 2.0
+BRANCH_RAIL_START_X = -2.00
+BRANCH_RAIL_END_X = -3.48
+BRANCH_RAIL_CENTER_X = 0.5 * (BRANCH_RAIL_START_X + BRANCH_RAIL_END_X)
+BRANCH_RAIL_HALF_LENGTH = 0.5 * abs(BRANCH_RAIL_END_X - BRANCH_RAIL_START_X)
+
+# Hueco en la barandilla de la Cinta 4 para el robot
+PICK_RAIL_OPEN_Y_MIN = -0.10
+PICK_RAIL_OPEN_Y_MAX = 0.72
+LEFT_RAIL_UPPER_CENTER_Y = 0.5 * (RAIL_HALF_LENGTH + PICK_RAIL_OPEN_Y_MAX)
+LEFT_RAIL_UPPER_HALF = 0.5 * (RAIL_HALF_LENGTH - PICK_RAIL_OPEN_Y_MAX)
+LEFT_RAIL_LOWER_CENTER_Y = 0.5 * (-RAIL_HALF_LENGTH + PICK_RAIL_OPEN_Y_MIN)
+LEFT_RAIL_LOWER_HALF = 0.5 * (PICK_RAIL_OPEN_Y_MIN + RAIL_HALF_LENGTH)
+
+# ---------------- Robot Panda (prueba de IK) ----------------
+ROBOT_IK_TEST_MODE = True               # False = pick-and-place automático
+ROBOT_IK_TARGET_POSITION = [-1.45, 0.05, 0.85]
+ROBOT_IK_TARGET_RPY_DEG = [0.0, 0.0, 20.0]
+ROBOT_IK_ORIENTATION_FRAME = "home"
+ROBOT_IK_GRIPPER_OPEN = True
+ISLAND_HALF_X = 0.18
+ISLAND_HALF_Y = 0.38
+
+# ---------------- Visión ----------------
+VISION_SAT_MIN = 50
+VISION_VAL_MIN = 120
+VISION_AREA_MIN = 400
+VISION_MARGEN_BORDE = 3
+VISION_FACTOR_CARA = 0.85
+VISION_PROPORCION_CUADRADO = 1.2
+VISION_ZONA_CENTRAL = 0.20
+TIEMPO_INSPECCION = 0.3          # segundos parada
+REANUDAR_TRAS_INSPECCION = True
+VISION_RANGOS_COLOR = {          # tono H de HSV (0-179)
+    "rojo":     [(0, 8), (170, 179)],
+    "amarillo": [(15, 40)],
+    "verde":    [(40, 85)],
+    "azul":     [(85, 130)],
+    "morado":   [(130, 170)],
+}
+
+# ---------------- Horno ----------------
+OVEN_CENTER_X = -4.05
+OVEN_ENTRY_X = -3.58
+HORNO_GEOMS = ["oven_hot", "oven_roof"]
+HORNO_LUZ = "oven_light"
+HORNO_TEMP_INICIAL = 20.0
+HORNO_TEMP_MIN = 50.0
+HORNO_TEMP_MAX = 100.0
+HORNO_TEMP_LIMITE = 200.0
+HORNO_PASO_TEMP = 10.0

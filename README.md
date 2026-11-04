@@ -1,12 +1,11 @@
 # Práctica I: Planta industrial (POO)
 
 **Asignatura:** Programación Orientada a Objetos (POO), Universidad de Burgos
-**Autora:** Naela Khaldi
+**Autor:** Naela Khaldi
 
-Simulación de una planta industrial en **MuJoCo** con cinco cintas transportadoras,
-cinco cámaras de inspección, cinco piezas, un horno y un robot Franka Emika Panda.
-El código procedural del profesor (`planta_4_cintas.py`) se ha reorganizado
-siguiendo la **programación orientada a objetos**.
+imulación de una planta industrial en **MuJoCo** (cinco cintas, cinco cámaras,
+cinco piezas, un horno y un robot Panda). El código procedural del profesor
+(`planta_4_cintas.py`) se ha reorganizado en **clases**.
 
 ## Funcionalidades
 
@@ -17,11 +16,6 @@ siguiendo la **programación orientada a objetos**.
 - Horno con temperatura: cambia de color (azul = frío, naranja = en rango, rojo = sobrecalentado).
 - Robot Panda controlado con la cinemática inversa proporcionada (`robot.py`).
 
-## Requisitos
-
-- Python 3.10 o superior
-- Las librerías de `requirements.txt` (MuJoCo, OpenCV y NumPy)
-- Git y conexión a Internet la primera vez (para descargar el modelo del robot)
 
 ## Instalación
 
@@ -31,15 +25,6 @@ python -m venv .venv
 # source .venv/bin/activate     # Linux / macOS
 pip install -r requirements.txt
 ```
-
-El modelo del Panda se toma de **MuJoCo Menagerie**. Si no está en la carpeta del
-proyecto ni en la carpeta superior, `robot.py` lo descarga automáticamente con Git.
-También se puede clonar a mano:
-
-```bash
-git clone https://github.com/google-deepmind/mujoco_menagerie.git
-```
-
 ## Ejecución
 
 Desde la carpeta raíz del proyecto:
@@ -69,83 +54,32 @@ Con la ventana *Camaras de la planta* seleccionada (letras en minúscula):
 
 ## Cómo funciona
 
-### Idea general
-
-Cada elemento de la planta es un **objeto** con su propio estado (atributos) y su
-comportamiento (métodos). `PlantaIndustrial` crea todos los objetos a partir de las
-listas `DATOS_CINTAS`, `DATOS_OBJETOS` y `DATOS_CAMARAS` y los coordina.
-
-```
-main.py
- └── PlantaIndustrial
-      ├── 5 × CintaTransportadora
-      ├── 5 × ObjetoIndustrial
-      ├── 5 × CamaraInspeccion   (cada una controla su cinta)
-      ├── Horno
-      └── robot.py               (IK del profesor, usada como caja negra)
-```
-
-### Un paso de simulación
-
-`ejecutar()` repite `actualizar()` en bucle. En cada paso:
-
-1. **Robot**: actualiza su máquina de estados (solo en modo automático).
-2. **Transporte**: cada pieza pide a su cinta la fuerza (`calcular_fuerza()`), que se
-   aplica con `data.xfrc_applied`. Si hay otra pieza muy cerca delante
-   (`hay_pieza_delante()`), se frena. Al pasar una esquina cambia de cinta
-   (`actualizar_segmento()`).
-3. **Física**: `mujoco.mj_step()`.
-4. **Estabilizar**: las piezas no giran y los cilindros se mantienen en el centro.
-5. **Horno**: actualiza su color según la temperatura.
-6. **Cámaras**: 10 veces por segundo, cada cámara detecta y, si hace falta, para su cinta.
-
-### Detección de formas (`CamaraInspeccion`)
-
-1. Pasa la imagen a HSV y crea **una máscara por color** de pieza (así dos piezas juntas no se mezclan).
-2. Busca los contornos con `cv2.findContours`.
-3. Ignora los contornos pequeños, los que tocan el borde y los que no están en el centro.
-4. Usa solo la **cara superior** de la pieza y corrige la inclinación de la cámara.
-5. Clasifica la forma:
-   - circularidad > 0,82 → `circulo`
-   - 3 vértices → `triangulo`
-   - 4 vértices → `cuadrado` (lados casi iguales) o `rectangulo`
-
-### Parada de la cinta
-
-- Si aparece una pieza nueva, la cámara pone `objeto_detectado = True` y bloquea
-  su cinta con `cinta.bloquear()`.
-- Pasado `TIEMPO_INSPECCION` (0,3 s, en `config.py`), la desbloquea y la pieza sigue.
-- El conjunto `revisados` evita inspeccionar dos veces la misma pieza.
-- Se usa `bloquear()` en vez de `detener()` para no anular la parada manual con las teclas 1–5.
-
-### Horno (`Horno`)
-
-- Cuenta las piezas que entran (`pieza_entra()`, `registrar_pieza()`).
-- La temperatura se cambia con `+` y `-` y siempre queda entre 0 °C y 200 °C.
-- El color en MuJoCo depende del estado:
-
-| Temperatura | Estado | Color |
-|-------------|--------|-------|
-| menos de 50 °C | FRIO | azul |
-| de 50 a 100 °C | EN RANGO | naranja |
-| más de 100 °C | SOBRECALENTADO | rojo |
+- **CintaTransportadora:** guarda si está en marcha y calcula la fuerza que mueve las piezas.
+- **CamaraInspeccion:** detecta la forma con OpenCV (máscara por color, contornos, circularidad
+  y número de vértices). Si ve una pieza nueva, `objeto_detectado = True` y bloquea su cinta
+  0,3 s; después la reanuda.
+- **ObjetoIndustrial:** posición, forma y cinta en la que está cada pieza.
+- **Horno:** cuenta las piezas y cambia de color según la temperatura:
+  azul (< 50 °C), naranja (50–100 °C) y rojo (> 100 °C).
+- **PlantaIndustrial:** crea todos los objetos, ejecuta el bucle, gestiona el teclado y usa
+  `robot.py` (IK del profesor, sin modificar). Además mantiene una distancia mínima entre piezas.
 
 ## Estructura del proyecto
 
 ```
 Practica_1/
-├── main.py                      # Único punto de entrada
-├── requirements.txt             # Librerías necesarias
-├── planta_4_cintas.py           # Código original del profesor (referencia)
-├── capturas/                    # Capturas guardadas con la tecla S
+├── main.py                     
+├── requirements.txt           
+├── planta_4_cintas.py           
+├── capturas/                    
 └── src/
     ├── __init__.py
-    ├── config.py                # Constantes
-    ├── modelo_planta.py         # Genera el XML de MuJoCo
-    ├── cinta_transportadora.py  # Clase CintaTransportadora
-    ├── camara_inspeccion.py     # Clase CamaraInspeccion
-    ├── objeto_industrial.py     # Clase ObjetoIndustrial
-    ├── horno.py                 # Clase Horno
-    ├── planta_industrial.py     # Clase PlantaIndustrial
-    └── robot.py                 # IK del Panda (del profesor, sin modificar)
+    ├── config.py              
+    ├── modelo_planta.py         
+    ├── cinta_transportadora.py  
+    ├── camara_inspeccion.py     
+    ├── objeto_industrial.py     
+    ├── horno.py                 
+    ├── planta_industrial.py     
+    └── robot.py                 
 ```
